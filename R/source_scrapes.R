@@ -1207,6 +1207,13 @@ scrape_espn = function(pos = c("QB", "RB", "WR", "TE", "K", "DST"), season = NUL
       names(l_players[[i]]) = espn_columns[names(l_players[[i]])]
       l_players[[i]][] = lapply(l_players[[i]], round)
 
+      # ESPN's projected fantasy point total lives on stats[[1]]$appliedTotal
+      # (their internal scoring of the projected stats). Capturing as
+      # site_pts so consensus + downstream consumers see per-source points.
+      applied_total = espn_json[[i]]$player$stats[[1]]$appliedTotal
+      if(is.null(applied_total)) applied_total = NA_real_
+      l_players[[i]]$site_pts = applied_total
+
       # Misc player info
       l_players[[i]]$espn_id = espn_json[[i]]$id
       l_players[[i]]$player_name = espn_json[[i]]$player$fullName
