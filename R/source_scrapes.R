@@ -269,6 +269,10 @@ scrape_fantasysharks <- function(pos = c("QB", "RB", "WR", "TE", "K", "DST", "DL
     season == 2018 ~ 618,
     season == 2017 ~ 586
   )
+  if (is.na(year)) {
+    stop("FantasySharks segment map has no entry for season ", season,
+         "; add it to the case_when above (bases advance +32 per season)")
+  }
 
   # segment for url from user week input
   if (week == 0) {
