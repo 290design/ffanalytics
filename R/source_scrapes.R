@@ -258,6 +258,7 @@ scrape_fantasysharks <- function(pos = c("QB", "RB", "WR", "TE", "K", "DST", "DL
   }
   # historical scrapes (doesn't work)
   year = dplyr::case_when(
+    season == 2026 ~ 874,
     season == 2025 ~ 842,
     season == 2024 ~ 810,
     season == 2023 ~ 778,
