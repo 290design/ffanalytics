@@ -63,6 +63,17 @@ list_ffanalytics_cache = function(quiet = FALSE) {
 
 # Internal ----
 
+# Cached projections must belong to the requested provider and timeframe.
+# Missing metadata is a cache miss, including caches from older package builds.
+projection_cache_matches = function(object, season, week, source) {
+  isTRUE(attr(object, "season") == season) &&
+    isTRUE(as.character(attr(object, "week")) == as.character(week)) &&
+    length(object) > 0L &&
+    all(vapply(object, function(df) {
+      "data_src" %in% names(df) && all(!is.na(df$data_src) & df$data_src == source)
+    }, logical(1)))
+}
+
 cache_object = function(object, file_name) {
   ensure_cache_dir_exists()
   clear_cache_by_time()
@@ -196,7 +207,17 @@ cache_file_names = c(
   "ecr_weekly_db_std.rds" = "ECR Weekly DB Std",
   "ecr_weekly_db_half.rds" = "ECR Weekly DB Half",
   "ecr_weekly_db_ppr.rds" = "ECR Weekly DB PPR",
-  "cbs_scrape.rds" = "CBS Scrape"
+  "cbs_scrape.rds" = "CBS Scrape",
+  "nfl_scrape.rds" = "NFL Scrape",
+  "fantasysharks_scrape.rds" = "FantasySharks Scrape",
+  "numberfire_scrape.rds" = "NumberFire Scrape",
+  "walterfootball_scrape.rds" = "WalterFootball Scrape",
+  "fleaflicker_scrape.rds" = "FleaFlicker Scrape",
+  "fftoday_scrape.rds" = "FFToday Scrape",
+  "fantasypros_scrape.rds" = "FantasyPros Scrape",
+  "rtsports_scrape.rds" = "RTSports Scrape",
+  "espn_scrape.rds" = "ESPN Scrape",
+  "fanduel_scrape.rds" = "FanDuel Scrape"
 )
 
 
