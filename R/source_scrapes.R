@@ -421,8 +421,6 @@ scrape_numberfire <- function(pos = c("QB", "RB", "WR", "TE", "K", "DST", "LB", 
 
   message("\nThe numberFire scrape uses a 2 second delay between pages")
 
-  message("\nThe numberFire scrape uses a 2 second delay between pages")
-
   base_link <- paste0("https://www.numberfire.com/nfl/fantasy/fantasy-football-projections")
   site_session <- rvest::session(base_link)
 

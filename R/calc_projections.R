@@ -229,7 +229,7 @@ score_dst_pts_allowed = function(data_result, pts_bracket, is_actual = FALSE) {
 #' \code{vignette("scoring_settings")} on how to define custom scoring settings.
 #' If omitted then default \link{scoring} settings will be used.
 #' @export
-source_points = function(data_result, scoring_rules, return_data_result = FALSE, is_actual = FALSE) {
+source_points = function(data_result, scoring_rules = NULL, return_data_result = FALSE, is_actual = FALSE) {
 
   year = attr(data_result, "season")
   week = attr(data_result, "week")
@@ -333,7 +333,7 @@ projections_table = function(data_result, scoring_rules = NULL, src_weights = NU
     )
 
 
-    message("Note: the projections table function is intended to aggregate several sources")
+    message(sources_message)
   }
 
   # Computing league type
