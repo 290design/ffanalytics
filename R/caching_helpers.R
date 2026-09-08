@@ -63,6 +63,17 @@ list_ffanalytics_cache = function(quiet = FALSE) {
 
 # Internal ----
 
+# Cached projections must belong to the requested provider and timeframe.
+# Missing metadata is a cache miss, including caches from older package builds.
+projection_cache_matches = function(object, season, week, source) {
+  isTRUE(attr(object, "season") == season) &&
+    isTRUE(as.character(attr(object, "week")) == as.character(week)) &&
+    length(object) > 0L &&
+    all(vapply(object, function(df) {
+      "data_src" %in% names(df) && all(!is.na(df$data_src) & df$data_src == source)
+    }, logical(1)))
+}
+
 cache_object = function(object, file_name) {
   ensure_cache_dir_exists()
   clear_cache_by_time()

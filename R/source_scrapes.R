@@ -25,7 +25,7 @@ scrape_cbs = function(pos = c("QB", "RB", "WR", "TE", "K", "DST"), season = NULL
 
     pos_match = all(toupper(pos) %in% toupper(sort(names(l_pos))))
 
-    if(isTRUE(pos_match)) {
+    if(isTRUE(pos_match) && projection_cache_matches(l_pos, season, week, "CBS")) {
 
       scrape_message = paste0(
         "\n",
@@ -144,7 +144,7 @@ scrape_nfl = function(pos = c("QB", "RB", "WR", "TE", "K", "DST"), season = NULL
 
     pos_match = all(toupper(pos) %in% toupper(sort(names(l_pos))))
 
-    if(isTRUE(pos_match)) {
+    if(isTRUE(pos_match) && projection_cache_matches(l_pos, season, week, "NFL")) {
       scrape_message = paste0(
         "\n",
         "Using the NFL scrape that was cached ",
@@ -280,10 +280,6 @@ scrape_fantasysharks <- function(pos = c("QB", "RB", "WR", "TE", "K", "DST", "DL
     week = get_scrape_week()
   }
 
-  if(isTRUE(week != get_scrape_week())) {
-    clear_ffanalytics_cache("FantasySharks Scrape")
-  }
-
   curr_cache = list_ffanalytics_cache(quiet = TRUE)
   is_cached = "FantasySharks Scrape" %in% curr_cache$object
 
@@ -292,7 +288,7 @@ scrape_fantasysharks <- function(pos = c("QB", "RB", "WR", "TE", "K", "DST", "DL
 
     pos_match = all(toupper(pos) %in% toupper(sort(names(l_pos))))
 
-    if(isTRUE(pos_match)) {
+    if(isTRUE(pos_match) && projection_cache_matches(l_pos, season, week, "FantasySharks")) {
       scrape_message = paste0(
         "\n",
         "Using the FantasySharks scrape that was cached ",
@@ -320,6 +316,10 @@ scrape_fantasysharks <- function(pos = c("QB", "RB", "WR", "TE", "K", "DST", "DL
     season == 2018 ~ 618,
     season == 2017 ~ 586
   )
+  if (is.na(year)) {
+    stop("FantasySharks segment map has no entry for season ", season,
+         "; add it to the case_when above (bases advance +32 per season)")
+  }
 
   # segment for url from user week input
   if (week == 0) {
@@ -405,7 +405,7 @@ scrape_numberfire <- function(pos = c("QB", "RB", "WR", "TE", "K", "DST", "LB", 
 
     pos_match = all(toupper(pos) %in% toupper(sort(names(l_pos))))
 
-    if(isTRUE(pos_match)) {
+    if(isTRUE(pos_match) && projection_cache_matches(l_pos, season, week, "NumberFire")) {
       scrape_message = paste0(
         "\n",
         "Using the NumberFire scrape that was cached ",
@@ -587,7 +587,7 @@ scrape_walterfootball <- function(pos = c("QB", "RB", "WR", "TE", "K"),
 
     pos_match = all(toupper(pos) %in% toupper(sort(names(l_pos))))
 
-    if(isTRUE(pos_match)) {
+    if(isTRUE(pos_match) && projection_cache_matches(l_pos, season, week, "WalterFootball")) {
       scrape_message = paste0(
         "\n",
         "Using the WalterFootball scrape that was cached ",
@@ -697,7 +697,7 @@ scrape_fleaflicker <- function(pos = c("QB", "RB", "WR", "TE", "K", "DST", "DL",
   if(is_cached) {
     l_pos = get_cached_object("fleaflicker_scrape.rds")
     pos_match = all(toupper(pos) %in% toupper(sort(names(l_pos))))
-    if(isTRUE(pos_match)) {
+    if(isTRUE(pos_match) && projection_cache_matches(l_pos, season, week, "FleaFlicker")) {
       scrape_message = paste0("\n", "Using the FleaFlicker scrape that was cached ",
         curr_cache$hr_min_since_cache[curr_cache$object == "FleaFlicker Scrape"],
         " ago:")
@@ -1187,7 +1187,7 @@ scrape_fantasypros = function(pos = c("QB", "RB", "WR", "TE", "K", "DST"),
   attr(l_pos, "season") = season
   attr(l_pos, "week") = week
 
-  cache_object(l_pos, "walterfootball_scrape.rds")
+  cache_object(l_pos, "fantasypros_scrape.rds")
   l_pos
 }
 
@@ -1383,6 +1383,13 @@ scrape_espn = function(pos = c("QB", "RB", "WR", "TE", "K", "DST", "DL", "LB", "
       l_players[[i]] = l_players[[i]][names(l_players[[i]]) %in% names(pos_cols)]
       names(l_players[[i]]) = pos_cols[names(l_players[[i]])]
       l_players[[i]][] = lapply(l_players[[i]], round)
+
+      # ESPN's projected fantasy point total lives on stats[[1]]$appliedTotal
+      # (their internal scoring of the projected stats). Capturing as
+      # site_pts so consensus + downstream consumers see per-source points.
+      applied_total = espn_json[[i]]$player$stats[[1]]$appliedTotal
+      if(is.null(applied_total)) applied_total = NA_real_
+      l_players[[i]]$site_pts = applied_total
 
       # Misc player info
       l_players[[i]]$espn_id = espn_json[[i]]$id
